@@ -1,7 +1,6 @@
 #Import required libraries
 import socket
 import time  # Added to introduce delay between retries
-import time
 
 #Define the target host and port (Host and port of the server)
 target_host = "127.0.0.1"  # Localhost IP address
@@ -18,24 +17,29 @@ if change_target == "yes":
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 try:
-    #make connection with server without establishing socket to determine online presence
-    s.settimeout(5)  # 5 second timeout
-    while True:
+    # Set a timeout for the socket to prevent indefinite hanging
+    s.settimeout(5)  # 5-second timeout
+    retry_limit = 10  # Maximum number of retries
+    retries = 0  # Counter for retries
+
+    # Attempt to connect to the target host and port with retries
+    while retries < retry_limit:
         try:
-            #Attempt to connect to the target host and port
             s.connect((target_host, target_port))
             break  # Exit the loop if connection is successful
         except socket.error:
-            print(f"Unable to connect to {target_host}:{target_port}. Retrying...")
+            retries += 1
+            print(f"Unable to connect to {target_host}:{target_port}. Retrying ({retries}/{retry_limit})...")
             time.sleep(1)  # Introduce a 1-second delay before retrying
-            continue  # Retry connecting
-            time.sleep(1)  # Wait for 1 second before retrying
-            continue  # Retry connecting
+    else:
+        print("Exceeded maximum retry limit. Exiting...")
+        exit()  # Exit if retry limit is reached
+
     print(f"Connected with server at {target_host}:{target_port}")
 
-    #Send data to the server
-    s.sendall(b"Hello from the client!") # b signifies a byte string
-    #Receive a response from the server
+    # Send data to the server
+    s.sendall(b"Hello from the client!")  # b signifies a byte string
+
     # Receive data in chunks until the server closes the connection
     data = b""  # Initialize an empty bytes object
     while True:
@@ -45,19 +49,13 @@ try:
         data += chunk  # Append the received chunk to the data
     print(f"Received from server: {data.decode()}")
 
-    #close the connection and the client socket
-    s.close()
-    print("Connection closed.")
-
-# Handle problems that may occur during the socket connection, close the socket and exit the program
+# Handle problems that may occur during the socket connection
 except socket.error as err:
     print(f"Socket error: {err}")
     exit()
-# Handle any other exceptions that may occur, close the socket and exit the program
 except Exception as error:
     print(f"An unexpected error occurred: {error}")
     exit()
 finally:
-    #Ensure the socket is closed if it is still open
-    if s:
-        s.close()
+    # Ensure the socket is closed if it is still open
+    s.close()
