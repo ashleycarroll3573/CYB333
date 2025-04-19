@@ -37,17 +37,15 @@ try:
 
     print(f"Connected with server at {target_host}:{target_port}")
 
-    # Send data to the server
-    s.sendall(b"Hello from the client!")  # b signifies a byte string
-
-    # Receive data in chunks until the server closes the connection
-    data = b""  # Initialize an empty bytes object
-    while True:
-        chunk = s.recv(1024)  # Buffer size of 1024 bytes
-        if not chunk:  # If no more data is received, break the loop
-            break
-        data += chunk  # Append the received chunk to the data
+    #Send data to the server
+    s.sendall(b"Hello from the client!") #b signifies data will be sent in 8 bit bytes
+    #Receive a response from the server
+    data = s.recv(1024)  # Buffer size of 1024 bytes
     print(f"Received from server: {data.decode()}")
+
+    #close the connection and the client socket
+    s.close()
+    print("Connection closed.")
 
 # Handle problems that may occur during the socket connection
 except socket.error as err:
