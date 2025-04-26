@@ -51,6 +51,7 @@ try:
 except socket.error as err:
     print(f"Socket error: {err}")
     exit()
+# Handle any other exceptions that may occur
 except Exception as error:
     print(f"An unexpected error occurred: {error}")
     exit()
